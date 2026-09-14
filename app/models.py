@@ -18,11 +18,8 @@ class Module(Base):
     __tablename__ = "modules"
 
     id = Column(Integer, primary_key=True, index=True)
-    title_hi = Column(String(255), nullable=False)
-    title_sat = Column(String(255), nullable=False)
+    title = Column(String(255), nullable=False)
     safety_domain = Column(String(100), nullable=False)
-    version = Column(String(20), default="1.0")
-    content_payload = Column(JSONB, nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
 
 class Assessment(Base):
