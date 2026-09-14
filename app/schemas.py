@@ -17,11 +17,9 @@ class WorkerResponse(WorkerCreate):
 
 class ModuleResponse(BaseModel):
     id: int
-    title_hi: str
-    title_sat: str
+    title: str
     safety_domain: str
-    version: str
-    content_payload: Dict[str, Any]
+    created_at: datetime
     class Config:
         from_attributes = True
 

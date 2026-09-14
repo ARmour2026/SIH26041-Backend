@@ -34,6 +34,7 @@ Copy `.env.example` to `.env` and update the PostgreSQL connection string.
 ## Run
 
     uvicorn app.main:app --reload
+    .\venv\Scripts\python.exe -m uvicorn app.main:app --reload
 
 API:
 - http://127.0.0.1:8000/health

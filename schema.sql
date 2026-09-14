@@ -16,11 +16,8 @@ CREATE TABLE workers (
 -- Safety Training Modules Table
 CREATE TABLE modules (
     id SERIAL PRIMARY KEY,
-    title_hi VARCHAR(255) NOT NULL,
-    title_sat VARCHAR(255) NOT NULL,
+    title VARCHAR(255) NOT NULL,
     safety_domain VARCHAR(100) NOT NULL,
-    version VARCHAR(20) NOT NULL DEFAULT '1.0',
-    content_payload JSONB NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
