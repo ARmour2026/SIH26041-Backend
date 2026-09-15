@@ -8,6 +8,7 @@ CREATE TABLE workers (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     mobile_number VARCHAR(15) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
     sector sector_type NOT NULL,
     language_pref language_type DEFAULT 'hi',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
