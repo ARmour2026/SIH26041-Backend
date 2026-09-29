@@ -88,15 +88,3 @@ class ChangePasswordRequest(BaseModel):
 # Forgot Password Schemas
 # =========================
 
-class ForgotPasswordRequest(BaseModel):
-    mobile_number: str
-
-
-class VerifyOTPRequest(BaseModel):
-    mobile_number: str
-    otp: str
-
-
-class ResetPasswordRequest(BaseModel):
-    mobile_number: str
-    new_password: str

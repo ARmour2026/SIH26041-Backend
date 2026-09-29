@@ -1,22 +1,18 @@
-from datetime import datetime, timedelta, timezone
 import os
-import random
 
 import jwt
+from datetime import datetime, timezone, timedelta
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from pwdlib import PasswordHash
 
 from app.database import get_db
-from app.models import Worker, PasswordResetOTP
+from app.models import Worker
 from app.schemas import (
     RegisterRequest,
     LoginRequest,
     ChangePasswordRequest,
-    ForgotPasswordRequest,
-    VerifyOTPRequest,
-    ResetPasswordRequest,
 )
 
 
@@ -166,6 +162,10 @@ def get_current_user(
     return user
 
 
+# =========================
+# MY PROFILE
+# =========================
+
 @router.get("/me")
 def get_my_profile(
     current_user: Worker = Depends(get_current_user)
@@ -206,132 +206,4 @@ def change_password(
 
     return {
         "message": "Password changed successfully"
-    }
-
-
-# =========================
-# FORGOT PASSWORD
-# =========================
-
-@router.post("/forgot-password")
-def forgot_password(
-    data: ForgotPasswordRequest,
-    db: Session = Depends(get_db)
-):
-    user = db.query(Worker).filter(
-        Worker.mobile_number == data.mobile_number
-    ).first()
-
-    if not user:
-        raise HTTPException(
-            status_code=404,
-            detail="Mobile number is not registered"
-        )
-
-    # Generate 6-digit OTP
-    otp = str(random.randint(100000, 999999))
-
-    # OTP expires after 5 minutes
-    expires_at = datetime.now(timezone.utc) + timedelta(minutes=5)
-
-    # Remove old OTPs for this number
-    db.query(PasswordResetOTP).filter(
-        PasswordResetOTP.mobile_number == data.mobile_number
-    ).delete()
-
-    new_otp = PasswordResetOTP(
-        mobile_number=data.mobile_number,
-        otp=otp,
-        expires_at=expires_at,
-        is_verified=False
-    )
-
-    db.add(new_otp)
-    db.commit()
-
-    # DEMO ONLY:
-    # Later this OTP will be sent through an SMS provider.
-    return {
-        "message": "OTP generated successfully",
-        "otp": otp,
-        "expires_in_minutes": 5
-    }
-
-
-# =========================
-# VERIFY OTP
-# =========================
-
-@router.post("/verify-otp")
-def verify_otp(
-    data: VerifyOTPRequest,
-    db: Session = Depends(get_db)
-):
-    otp_record = db.query(PasswordResetOTP).filter(
-        PasswordResetOTP.mobile_number == data.mobile_number,
-        PasswordResetOTP.otp == data.otp,
-        PasswordResetOTP.is_verified == False
-    ).first()
-
-    if not otp_record:
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid OTP"
-        )
-
-    if otp_record.expires_at < datetime.now(timezone.utc):
-        raise HTTPException(
-            status_code=400,
-            detail="OTP has expired"
-        )
-
-    otp_record.is_verified = True
-    db.commit()
-
-    return {
-        "message": "OTP verified successfully"
-    }
-
-
-# =========================
-# RESET PASSWORD
-# =========================
-
-@router.post("/reset-password")
-def reset_password(
-    data: ResetPasswordRequest,
-    db: Session = Depends(get_db)
-):
-    user = db.query(Worker).filter(
-        Worker.mobile_number == data.mobile_number
-    ).first()
-
-    if not user:
-        raise HTTPException(
-            status_code=404,
-            detail="User not found"
-        )
-
-    verified_otp = db.query(PasswordResetOTP).filter(
-        PasswordResetOTP.mobile_number == data.mobile_number,
-        PasswordResetOTP.is_verified == True
-    ).order_by(
-        PasswordResetOTP.created_at.desc()
-    ).first()
-
-    if not verified_otp:
-        raise HTTPException(
-            status_code=400,
-            detail="Please verify OTP first"
-        )
-
-    user.password_hash = password_hash.hash(
-        data.new_password
-    )
-
-    db.delete(verified_otp)
-    db.commit()
-
-    return {
-        "message": "Password reset successfully"
     }

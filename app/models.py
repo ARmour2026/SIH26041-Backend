@@ -63,14 +63,3 @@ class OfflineSyncLog(Base):
     worker_id = Column(Integer, ForeignKey("workers.id", ondelete="CASCADE"))
     sync_payload = Column(JSONB, nullable=False)
     synced_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
-
-
-class PasswordResetOTP(Base):
-    __tablename__ = "password_reset_otps"
-
-    id = Column(Integer, primary_key=True, index=True)
-    mobile_number = Column(String(15), nullable=False, index=True)
-    otp = Column(String(6), nullable=False)
-    expires_at = Column(TIMESTAMP(timezone=True), nullable=False)
-    is_verified = Column(Boolean, default=False)
-    created_at = Column(TIMESTAMP(timezone=True), server_default=func.now())
